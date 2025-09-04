@@ -5,7 +5,6 @@ import (
 
 	userpb "github.com/stepanchaban/project-prot/proto/user"
 	"github.com/stepanchaban/users-service/internal/user"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type Handler struct {
@@ -86,11 +85,22 @@ func (h *Handler) UpdateUser(ctx context.Context, req *userpb.UpdateUserRequest)
 	}, nil
 }
 
-func (h *Handler) DeleteUser(ctx context.Context, req *userpb.DeleteUserRequest) (*emptypb.Empty, error) {
-	err := h.svc.DeleteUser(req.Id)
-	if err != nil {
-		return nil, err
-	}
+func (h *Handler) DeleteUser(ctx context.Context, req *userpb.DeleteUserRequest) (*userpb.DeleteUserResponse, error) {
+    success, err := h.svc.DeleteUser(req.Id)
+    if err != nil {
+        return &userpb.DeleteUserResponse{
+            Success: false,
+            Message: err.Error(),
+        }, nil
+    }
 
-	return &emptypb.Empty{}, nil
+    message := "User deleted successfully"
+    if !success {
+        message = "User not found"
+    }
+
+    return &userpb.DeleteUserResponse{
+        Success: success,
+        Message: message,
+    }, nil
 }

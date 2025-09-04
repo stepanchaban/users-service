@@ -9,7 +9,7 @@ type UserRepository interface {
 	GetAllUsers() ([]User, error)
 	GetUserByID(id string) (User, error)
 	UpdateUser(user User) error
-	DeleteUser(id string) error
+	DeleteUser(id string) (bool, error) 
 }
 
 type userRepository struct {
@@ -40,6 +40,10 @@ func (r *userRepository) UpdateUser(user User) error {
 	return r.db.Save(&user).Error
 }
 
-func (r *userRepository) DeleteUser(id string) error {
-	return r.db.Delete(&User{}, "id = ?", id).Error
+func (r *userRepository) DeleteUser(id string) (bool, error) {
+    result := r.db.Delete(&User{}, "id = ?", id)
+    if result.Error != nil {
+        return false, result.Error
+    }
+    return result.RowsAffected > 0, nil
 }

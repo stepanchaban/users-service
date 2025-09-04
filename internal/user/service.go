@@ -9,11 +9,11 @@ import (
 )
 
 type UserService interface {
-	CreateUser(req UserRequest) (User, error)
-	GetAllUsers() ([]User, error)
-	GetUserByID(id string) (User, error)
-	UpdateUser(id string, req UserRequest) (User, error)
-	DeleteUser(id string) error
+    CreateUser(req UserRequest) (User, error)
+    GetAllUsers() ([]User, error)
+    GetUserByID(id string) (User, error)
+    UpdateUser(id string, req UserRequest) (User, error)
+    DeleteUser(id string) (bool, error) // Changed to return bool
 }
 
 type userService struct {
@@ -121,9 +121,9 @@ func (s *userService) UpdateUser(id string, req UserRequest) (User, error) {
 	return user, nil
 }
 
-func (s *userService) DeleteUser(id string) error {
-	if id == "" {
-		return errors.New("user ID is required")
-	}
-	return s.repo.DeleteUser(id)
+func (s *userService) DeleteUser(id string) (bool, error) {
+    if id == "" {
+        return false, errors.New("user ID is required")
+    }
+    return s.repo.DeleteUser(id)
 }

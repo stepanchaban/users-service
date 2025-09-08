@@ -2,9 +2,12 @@ package grpc
 
 import (
 	"context"
+	"log"
 
 	userpb "github.com/stepanchaban/project-prot/proto/user"
 	"github.com/stepanchaban/users-service/internal/user"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type Handler struct {
@@ -85,22 +88,23 @@ func (h *Handler) UpdateUser(ctx context.Context, req *userpb.UpdateUserRequest)
 	}, nil
 }
 
+
 func (h *Handler) DeleteUser(ctx context.Context, req *userpb.DeleteUserRequest) (*userpb.DeleteUserResponse, error) {
-    success, err := h.svc.DeleteUser(req.Id)
+    log.Printf("🟢 DeleteUser called with ID: %s", req.Id)
+    
+    err := h.svc.DeleteUser(req.Id)
     if err != nil {
-        return &userpb.DeleteUserResponse{
-            Success: false,
-            Message: err.Error(),
-        }, nil
+        log.Printf("🔴 DeleteUser error: %v", err)
+        return nil, status.Errorf(codes.Internal, "failed to delete user: %v", err)
     }
-
-    message := "User deleted successfully"
-    if !success {
-        message = "User not found"
+    
+    // Создаем response и логируем его
+    response := &userpb.DeleteUserResponse{
+        Success: true,
     }
-
-    return &userpb.DeleteUserResponse{
-        Success: success,
-        Message: message,
-    }, nil
+    
+    log.Printf("🟢 DeleteUser successful, returning response: %+v", response)
+    log.Printf("🟢 Response.Success value: %t", response.Success)
+    
+    return response, nil
 }
